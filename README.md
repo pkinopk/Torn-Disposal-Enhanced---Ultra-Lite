@@ -1,31 +1,17 @@
 # Torn Disposal Enhanced - Ultra Lite
 
-A lightning-fast, lightweight userscript for the Disposal crime in [Torn City](https://www.torn.com/). 
-
-This "Ultra Lite" version strips away API overhead and profitability calculations to focus entirely on one thing: **safety**. By using hardcoded statistical data and the Wilson Lower Bound algorithm, it instantly highlights the safest disposal method without lagging your browser or relying on external requests.
+A heavily optimized, zero-dependency userscript for Torn City's Disposal crime. This script calculates the safest disposal method using the Wilson Lower Bound algorithm based on historical success rates and highlights the best choice.
 
 ## Features
-
-*   **Zero API Calls:** Completely standalone. No API key required and no network latency.
-*   **Statistical Accuracy:** Uses the Wilson Lower Bound algorithm to calculate confidence in success rates based on thousands of recorded attempts.
-*   **Color-Coded Options:** Disposal methods are automatically tinted based on safety percentiles:
-    *   🟩 **Green:** Safe
-    *   🟨 **Yellow:** Moderate / Unsafe
-    *   🟧 **Orange:** Risky
-    *   🟥 **Red:** Dangerous
-*   **Instant Best Choice:** The statistically best option is always highlighted with a glowing green border.
+* **Zero Overhead:** No API calls, no profitability calculations, and no complex gradient percentiles. 
+* **Single Clear Indicator:** Identifies the statistically safest disposal method for each item and highlights it with a clean green border.
+* **Instant Processing:** Pre-calculates scores on load and utilizes a lightweight `MutationObserver` to instantly highlight options as Torn's React UI renders.
 
 ## Installation
+1. Install a userscript manager extension for your browser (e.g., [Tampermonkey](https://www.tampermonkey.net/) or [Violentmonkey](https://violentmonkey.github.io/)).
+2. Click on the `script.js` file in this repository.
+3. Click the **"Raw"** button in the top right corner.
+4. Your userscript manager will prompt you to install or update the script. Click **Install**.
 
-1. Install a userscript manager like [Tampermonkey](https://www.tampermonkey.net/) or [Violentmonkey](https://violentmonkey.github.io/) for your browser.
-2. Open the `Torn Disposal Enhanced - Ultra Lite.js` in this repository.
-3. Click the **Raw** button in the top right corner of the code box.
-4. Your userscript manager will automatically detect the script and prompt you to install it. Click **Install**.
-
-## Usage
-
-Simply navigate to the **Crimes -> Disposal** page in Torn. The script runs automatically, processing the option cards as they load and applying the color codes and highlights immediately.
-
-## Disclaimer
-
-This script uses historical data to estimate success rates. While the Wilson Lower Bound provides a statistically conservative estimate, Torn's internal mechanics include RNG (Random Number Generation). A "safe" option can still fail, and this script does not guarantee a 100% success rate.
+## How it Works
+The script evaluates hardcoded community data consisting of success rates and sample sizes for every disposal method. It uses the Wilson Lower Bound formula to confidently rank methods even when sample sizes vary wildly, guaranteeing the highlighted method is mathematically the safest option.
