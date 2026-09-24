@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Torn Disposal Enhanced - Ultra Lite
-// @version      1.0.0
+// @version      1.1.0
 // @namespace    enanchedDisposalLite
-// @description  Lightning-fast statistical disposal classification using Wilson lower bound. Stripped of API and profitability overhead.
+// @description  Lightning-fast statistical disposal classification using Wilson lower bound. Highlights the single safest method.
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=torn.com
 // @match        https://www.torn.com/page.php?sid=crimes*
 // @match        https://www.torn.com/loader.php?sid=crimes*
@@ -12,18 +12,11 @@
 (function() {
     'use strict';
 
-    const COLORS = {
-        dangerous: 'rgba(198, 40, 40, 0.2)',
-        risky:     'rgba(232, 92, 58, 0.2)',
-        unsafe:    'rgba(242, 199, 70, 0.2)',
-        moderate:  'rgba(140, 207, 94, 0.2)',
-        safe:      'rgba(26, 152, 80, 0.2)'
-    };
-
     GM_addStyle(`
         .disposal-best-option {
             border: 2px solid #1A9850 !important;
             box-shadow: 0 0 8px rgba(26, 152, 80, 0.6) !important;
+            border-radius: 50%; /* Ensures the highlight wraps cleanly around the circular buttons */
         }
     `);
 
@@ -106,7 +99,7 @@
 
     function getWilsonLowerBound(successRate, attempts) {
         if (attempts === 0) return 0;
-        const z = 1.96; // 95% confidence
+        const z = 1.96; 
         const p = successRate / 100;
         const denominator = 1 + (z * z) / attempts;
         const centre = p + (z * z) / (2 * attempts);
@@ -114,48 +107,23 @@
         return ((centre - adjustment) / denominator) * 100;
     }
 
-    // Pre-calculate all Wilson scores to build the percentile scale instantly
-    const allScores = [];
     const scoreMap = new Map();
-
     for (const [item, methods] of Object.entries(SUCCESS_RATES)) {
         for (const [method, data] of Object.entries(methods)) {
-            const score = getWilsonLowerBound(data.success, data.samples);
-            allScores.push(score);
-            scoreMap.set(`${item}|${method}`, score);
+            scoreMap.set(`${item}|${method}`, getWilsonLowerBound(data.success, data.samples));
         }
-    }
-    allScores.sort((a, b) => a - b);
-
-    function getPercentileColor(score) {
-        if (allScores.length === 0) return COLORS.dangerous;
-
-        let position = 0;
-        for (let i = 0; i < allScores.length; i++) {
-            if (allScores[i] <= score) position = i + 1;
-            else break;
-        }
-
-        const percentile = position / allScores.length;
-        if (percentile >= 0.80) return COLORS.safe;
-        if (percentile >= 0.60) return COLORS.moderate;
-        if (percentile >= 0.40) return COLORS.unsafe;
-        if (percentile >= 0.20) return COLORS.risky;
-        return COLORS.dangerous;
     }
 
     function processDisposalUI() {
-        // Find all active crime option cards
         const crimeCards = document.querySelectorAll('[class*="crimeOption___"], .crime-option');
         if (!crimeCards.length) return;
 
         crimeCards.forEach(card => {
-            // Prevent redundant processing
             if (card.dataset.processed) return;
-
+            
             const titleElement = card.querySelector('[class*="crimeOptionSection"], .title');
             if (!titleElement) return;
-
+            
             const itemType = titleElement.textContent.trim();
             if (!SUCCESS_RATES[itemType]) return;
 
@@ -165,7 +133,6 @@
             let bestMethod = null;
             let highestScore = -1;
 
-            // Find the best method for this specific item
             buttons.forEach(btn => {
                 const method = btn.getAttribute('aria-label');
                 const score = scoreMap.get(`${itemType}|${method}`);
@@ -175,24 +142,14 @@
                 }
             });
 
-            // Apply color coding and borders
-            buttons.forEach(btn => {
-                const method = btn.getAttribute('aria-label');
-                const score = scoreMap.get(`${itemType}|${method}`);
-
-                if (score !== undefined) {
-                    btn.style.backgroundColor = getPercentileColor(score);
-                    if (btn === bestMethod) {
-                        btn.classList.add('disposal-best-option');
-                    }
-                }
-            });
+            if (bestMethod) {
+                bestMethod.classList.add('disposal-best-option');
+            }
 
             card.dataset.processed = "true";
         });
     }
 
-    // Lean observer just for DOM injection
     const observer = new MutationObserver((mutations) => {
         let shouldProcess = false;
         for (const mutation of mutations) {
@@ -202,7 +159,6 @@
             }
         }
         if (shouldProcess) {
-            // Debounce the processing slightly to let React finish rendering
             clearTimeout(window.disposalTimeout);
             window.disposalTimeout = setTimeout(processDisposalUI, 50);
         }
