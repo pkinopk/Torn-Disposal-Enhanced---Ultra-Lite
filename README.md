@@ -18,7 +18,7 @@ This "Ultra Lite" version strips away API overhead and profitability calculation
 ## Installation
 
 1. Install a userscript manager like [Tampermonkey](https://www.tampermonkey.net/) or [Violentmonkey](https://violentmonkey.github.io/) for your browser.
-2. Open the `script.user.js` (or whatever you name the script file) in this repository.
+2. Open the `Torn Disposal Enhanced - Ultra Lite.js` in this repository.
 3. Click the **Raw** button in the top right corner of the code box.
 4. Your userscript manager will automatically detect the script and prompt you to install it. Click **Install**.
 
